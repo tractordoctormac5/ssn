@@ -54,13 +54,6 @@ ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND avr-objcopy -O ihex
 
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND avr-size ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME} --mcu=${DEVICE} --totals --format=avr)
 
-
-if (VERBOSE_DEBUG)
-    set(VERBOSE "-v -v -v -v")
-else ()
-    set(VERBOSE "")
-endif ()
-
 if (FLASH)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND avrdude -b 38400 -p ${CHIPSET} -P ${USB} -c ${PROGRAMMER} -U flash:w:../bin/${PROJECT_NAME}.hex)
 else ()
