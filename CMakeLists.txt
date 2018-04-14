@@ -12,6 +12,10 @@ set(PROGRAMMER xplainedpro)
 
 SET(FLASH false)
 
+# will clean flash memory of device (used for reseting)
+SET(CLEAN_DEVICE false)
+
+
 #============================================================================================
 # fix mac aquires device
 # https://github.com/jakeh12/atmel-ice-mac-driver
@@ -47,12 +51,23 @@ SET(SOURCE_FILES
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCE_FILES})
 
+if (CLEAN_DEVICE)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND avrdude -e -b 38400 -p ${CHIPSET} -P ${USB} -c ${PROGRAMMER})
+
+    return(0)
+endif ()
+
+
 
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND avr-objcopy -O ihex -R.eeprom ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex)
 
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND avr-objcopy -O ihex -j .eeprom --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.eep)
 
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND avr-size ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME} --mcu=${DEVICE} --totals --format=avr)
+
+
+
 
 if (FLASH)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND avrdude -b 38400 -p ${CHIPSET} -P ${USB} -c ${PROGRAMMER} -U flash:w:../bin/${PROJECT_NAME}.hex)
